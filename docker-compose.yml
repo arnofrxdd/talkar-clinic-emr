@@ -1,0 +1,29 @@
+services:
+  talkar-clinic-emr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: talkar-clinic-emr
+    restart: always
+    ports:
+      # Exposes to unique port 7577 (customizable via CLINIC_PORT env var)
+      - "${CLINIC_PORT:-7577}:7577"
+    environment:
+      - NODE_ENV=production
+      - PORT=7577
+      - HOST=0.0.0.0
+      - DOMAIN=clinic.talkar.in
+      - DATABASE_URL=file:/app/data/clinic.db
+    volumes:
+      # Persistent SQLite volume for zero data loss across container updates
+      - talkar_clinic_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7577/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  talkar_clinic_data:
+    name: talkar_clinic_storage

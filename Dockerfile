@@ -1,0 +1,37 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install OpenSSL for Prisma engine on Alpine Linux
+RUN apk add --no-cache openssl wget
+
+# Copy package descriptors
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install production and development dependencies needed for TypeScript execution
+RUN npm ci
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy source code, assets and config
+COPY tsconfig.json ./
+COPY src ./src/
+COPY public ./public/
+COPY scripts ./scripts/
+COPY docker-entrypoint.sh ./
+
+RUN chmod +x ./docker-entrypoint.sh
+
+# Unique default port 7577 for Clinic EMR deployment
+ENV NODE_ENV=production
+ENV PORT=7577
+ENV HOST=0.0.0.0
+ENV DOMAIN=clinic.talkar.in
+ENV DATABASE_URL="file:/app/data/clinic.db"
+
+EXPOSE 7577
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["npm", "start"]

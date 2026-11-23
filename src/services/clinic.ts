@@ -551,6 +551,52 @@ export class ClinicService {
 
     return { matched: false, message: 'No matching appointment found to enrich' };
   }
+
+  /**
+   * Trigger outbound Voice AI Call via Talkar Telephony MCP
+   */
+  async triggerAiCall(slug: string, phone: string, patientName: string = 'Patient') {
+    const clinic = await prisma.clinic.findUnique({ where: { slug } });
+    if (!clinic) throw new Error(`Clinic "${slug}" not found`);
+
+    const cleanPhone = sanitizePhone(phone);
+    const apiKey = process.env.TALKAR_API_KEY || 'dgr_mhbjuBQqjlZS1AWJ12_SjWd9d_YmmOvGYJtSwQ_UCtY';
+    const workflowId = 126; // Clove Dental - Aditi Medical Receptionist (Sarvam 105B)
+    const fromPhoneNumberId = 14;
+
+    const payload = {
+      jsonrpc: '2.0',
+      id: Date.now(),
+      method: 'tools/call',
+      params: {
+        name: 'initiate_call',
+        arguments: {
+          workflow_id: workflowId,
+          phone_number: cleanPhone,
+          from_phone_number_id: fromPhoneNumberId,
+          initial_context: {
+            clinic_slug: slug,
+            clinic_name: clinic.name,
+            patient_name: patientName,
+            phone: cleanPhone,
+          }
+        }
+      }
+    };
+
+    const resp = await fetch('https://talkar.in/api/v1/mcp/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream',
+        'X-API-Key': apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await resp.json();
+    return { success: true, response: data };
+  }
 }
 
 export const clinicService = new ClinicService();

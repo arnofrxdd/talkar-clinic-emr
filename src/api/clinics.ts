@@ -69,3 +69,18 @@ clinicsRouter.get('/:slug/treatments', async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// POST /api/clinics/:slug/call-patient - Dispatch Talkar Voice AI call
+clinicsRouter.post('/:slug/call-patient', async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const { phone, patient_name } = req.body;
+    if (!phone) {
+      return res.status(400).json({ success: false, error: 'Phone number is required' });
+    }
+    const result = await clinicService.triggerAiCall(slug, phone, patient_name);
+    res.json({ success: true, message: `Call initiated to ${phone}`, result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});

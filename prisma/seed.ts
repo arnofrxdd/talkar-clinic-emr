@@ -11,7 +11,7 @@ async function main() {
     update: {
       name: 'Clove Dental - Indiranagar',
       brand: 'Clove Dental India',
-      specialty: 'Multi-Specialty Dental & Oral Surgery Clinic',
+      specialty: 'Dental & Oral Surgery',
       tagline: "India's Leading Dental Clinic Network",
       description: 'NABH certified clinic with 100% sterilization standards, painless rotary root canals, German titanium implants, and 3D digital smile aligners.',
       phone: '+91 80 4710 8820',
@@ -27,7 +27,7 @@ async function main() {
       slug: 'clove-dental',
       name: 'Clove Dental - Indiranagar',
       brand: 'Clove Dental India',
-      specialty: 'Multi-Specialty Dental & Oral Surgery Clinic',
+      specialty: 'Dental & Oral Surgery',
       tagline: "India's Leading Dental Clinic Network",
       description: 'NABH certified clinic with 100% sterilization standards, painless rotary root canals, German titanium implants, and 3D digital smile aligners.',
       phone: '+91 80 4710 8820',
@@ -124,7 +124,7 @@ async function main() {
   });
 
   // 3. Treatments for Clove Dental
-  const treatments = [
+  const cloveTreatments = [
     {
       code: 'CLOVE-IMPLANT',
       title: 'German Titanium Dental Implant',
@@ -167,7 +167,7 @@ async function main() {
     }
   ];
 
-  for (const t of treatments) {
+  for (const t of cloveTreatments) {
     await prisma.treatment.upsert({
       where: {
         clinicId_code: {
@@ -183,11 +183,11 @@ async function main() {
     });
   }
 
-  // 4. Sample OPD Appointments
+  // 4. Sample OPD Appointments for Clove Dental
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
-  const sampleAppointments = [
+  const cloveAppointments = [
     {
       reference: 'OPD-7821',
       clinicId: cloveClinic.id,
@@ -200,7 +200,7 @@ async function main() {
       date: today,
       timeSlot: '11:30 AM',
       type: 'CONSULTATION',
-      status: 'SCHEDULED', // Upcoming
+      status: 'SCHEDULED',
       symptoms: 'Persistent dull ache in lower right molar when biting',
       treatmentCode: 'CLOVE-RCT',
       fee: 600,
@@ -220,7 +220,7 @@ async function main() {
       date: today,
       timeSlot: '12:00 PM',
       type: 'CONSULTATION',
-      status: 'WAITING', // Checked In
+      status: 'WAITING',
       symptoms: 'Consultation for full arch missing teeth implant restoration',
       treatmentCode: 'CLOVE-IMPLANT',
       fee: 800,
@@ -240,7 +240,7 @@ async function main() {
       date: today,
       timeSlot: '10:30 AM',
       type: 'PROCEDURE',
-      status: 'IN_CONSULTATION', // Currently with doctor
+      status: 'IN_CONSULTATION',
       symptoms: 'Crowding in front upper teeth - 3D aligner digital scan',
       treatmentCode: 'CLOVE-ALIGNER',
       fee: 700,
@@ -291,7 +291,7 @@ async function main() {
     }
   ];
 
-  for (const appt of sampleAppointments) {
+  for (const appt of cloveAppointments) {
     await prisma.appointment.upsert({
       where: { reference: appt.reference },
       update: appt,
@@ -299,13 +299,13 @@ async function main() {
     });
   }
 
-  // 5. Second Clinic: Apollo Clinic - Koramangala (demonstrating multi-tenancy)
+  // 5. Second Clinic: Apollo Clinic - Koramangala (Multi-Specialty)
   const apolloClinic = await prisma.clinic.upsert({
     where: { slug: 'apollo-clinic' },
     update: {
       name: 'Apollo Clinic - Koramangala',
       brand: 'Apollo Hospitals',
-      specialty: 'Family Medicine & Multi-Specialty Clinic',
+      specialty: 'Family Medicine & Multi-Specialty',
       tagline: 'Touched By A Billion Lives',
       phone: '+91 80 2553 4400',
       email: 'koramangala@apolloclinic.com',
@@ -320,7 +320,7 @@ async function main() {
       slug: 'apollo-clinic',
       name: 'Apollo Clinic - Koramangala',
       brand: 'Apollo Hospitals',
-      specialty: 'Family Medicine & Multi-Specialty Clinic',
+      specialty: 'Family Medicine & Multi-Specialty',
       tagline: 'Touched By A Billion Lives',
       phone: '+91 80 2553 4400',
       email: 'koramangala@apolloclinic.com',
@@ -333,15 +333,15 @@ async function main() {
     }
   });
 
-  await prisma.doctor.upsert({
+  const drAnanya = await prisma.doctor.upsert({
     where: { id: 'doc-apollo-ananya-sen' },
     update: {
       name: 'Dr. Ananya Sen',
       designation: 'Senior Consultant Physician & Diabetologist',
-      department: 'General & Internal Medicine',
+      department: 'Internal Medicine',
       qualification: 'MD, MBBS (CMC Vellore) - 14 Yrs Exp',
       consultationFee: 750,
-      roomNumber: 'OPD-A1',
+      roomNumber: 'OPD-1',
       availableDays: 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
       availableHours: '9:00 AM - 1:00 PM, 5:00 PM - 8:30 PM',
       clinicId: apolloClinic.id
@@ -351,20 +351,190 @@ async function main() {
       clinicId: apolloClinic.id,
       name: 'Dr. Ananya Sen',
       designation: 'Senior Consultant Physician & Diabetologist',
-      department: 'General & Internal Medicine',
+      department: 'Internal Medicine',
       qualification: 'MD, MBBS (CMC Vellore) - 14 Yrs Exp',
       consultationFee: 750,
-      roomNumber: 'OPD-A1',
+      roomNumber: 'OPD-1',
       availableDays: 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
       availableHours: '9:00 AM - 1:00 PM, 5:00 PM - 8:30 PM'
     }
   });
 
+  const drSrinivas = await prisma.doctor.upsert({
+    where: { id: 'doc-apollo-k-srinivas' },
+    update: {
+      name: 'Dr. K. Srinivas',
+      designation: 'Consultant Pediatrician & Neonatologist',
+      department: 'Pediatrics',
+      qualification: 'MD (Pediatrics), DCH - 11 Yrs Exp',
+      consultationFee: 700,
+      roomNumber: 'OPD-2',
+      availableDays: 'Monday,Wednesday,Friday,Saturday',
+      availableHours: '10:00 AM - 2:00 PM, 4:30 PM - 8:00 PM',
+      clinicId: apolloClinic.id
+    },
+    create: {
+      id: 'doc-apollo-k-srinivas',
+      clinicId: apolloClinic.id,
+      name: 'Dr. K. Srinivas',
+      designation: 'Consultant Pediatrician & Neonatologist',
+      department: 'Pediatrics',
+      qualification: 'MD (Pediatrics), DCH - 11 Yrs Exp',
+      consultationFee: 700,
+      roomNumber: 'OPD-2',
+      availableDays: 'Monday,Wednesday,Friday,Saturday',
+      availableHours: '10:00 AM - 2:00 PM, 4:30 PM - 8:00 PM'
+    }
+  });
+
+  // Apollo Treatments
+  const apolloTreatments = [
+    {
+      code: 'APOLLO-HEALTH-CHECK',
+      title: 'Comprehensive Master Health Checkup',
+      category: 'Preventive Diagnostics',
+      description: 'Includes Complete Blood Count, Liver & Kidney Function Tests, Lipid Profile, Fasting Blood Glucose, ECG, and Doctor Consultation.',
+      price: 3500,
+      durationMinutes: 90,
+      brochureUrl: 'https://clinic.talkar.in/brochures/dental-implants.pdf',
+      prepNotes: 'Fasting required for 10-12 hours prior to sample collection.'
+    },
+    {
+      code: 'APOLLO-DIABETES-CARE',
+      title: 'Annual Diabetes & Metabolic Management Plan',
+      category: 'Chronic Care',
+      description: 'Quarterly HbA1c tests, continuous glucose monitoring analysis, diet and lifestyle counseling with Diabetologist consultation.',
+      price: 4800,
+      durationMinutes: 45,
+      brochureUrl: 'https://clinic.talkar.in/brochures/clear-aligners.pdf',
+      prepNotes: 'Bring all past medical prescriptions and recent lab reports.'
+    },
+    {
+      code: 'APOLLO-PEDIATRIC-WELLNESS',
+      title: 'Child Growth & Vaccination Consultation',
+      category: 'Pediatrics',
+      description: 'Developmental milestones tracking, nutritional assessment, and IAP-recommended immunization review by Senior Pediatrician.',
+      price: 700,
+      durationMinutes: 30,
+      brochureUrl: 'https://clinic.talkar.in/brochures/teeth-cleaning-guide.pdf',
+      prepNotes: 'Bring child immunization book and previous vaccination records.'
+    }
+  ];
+
+  for (const t of apolloTreatments) {
+    await prisma.treatment.upsert({
+      where: {
+        clinicId_code: {
+          clinicId: apolloClinic.id,
+          code: t.code
+        }
+      },
+      update: t,
+      create: {
+        ...t,
+        clinicId: apolloClinic.id
+      }
+    });
+  }
+
+  // Apollo Appointments
+  const apolloAppointments = [
+    {
+      reference: 'OPD-5102',
+      clinicId: apolloClinic.id,
+      doctorId: drAnanya.id,
+      doctorName: drAnanya.name,
+      department: drAnanya.department,
+      patientName: 'Anita Desai',
+      patientPhone: '9820011223',
+      patientEmail: 'anita.desai@example.com',
+      date: today,
+      timeSlot: '11:00 AM',
+      type: 'CONSULTATION',
+      status: 'SCHEDULED',
+      symptoms: 'Quarterly diabetes review and HbA1c test report discussion',
+      treatmentCode: 'APOLLO-DIABETES-CARE',
+      fee: 750,
+      paymentStatus: 'PAY_AT_CLINIC',
+      source: 'VOICE_AI',
+      notes: 'Fasting report brought; requested prescription refill.'
+    },
+    {
+      reference: 'OPD-6194',
+      clinicId: apolloClinic.id,
+      doctorId: drAnanya.id,
+      doctorName: drAnanya.name,
+      department: drAnanya.department,
+      patientName: 'Vikram Mehta',
+      patientPhone: '9845099887',
+      patientEmail: 'vikram.mehta@example.com',
+      date: today,
+      timeSlot: '11:30 AM',
+      type: 'CONSULTATION',
+      status: 'WAITING',
+      symptoms: 'Persistent fatigue, elevated blood pressure and post-lunch sugar spikes',
+      treatmentCode: 'APOLLO-HEALTH-CHECK',
+      fee: 750,
+      paymentStatus: 'PAY_AT_CLINIC',
+      source: 'WALK_IN',
+      notes: 'Arrived at Koramangala clinic. Vitals recorded: BP 138/88 mmHg.'
+    },
+    {
+      reference: 'OPD-4890',
+      clinicId: apolloClinic.id,
+      doctorId: drSrinivas.id,
+      doctorName: drSrinivas.name,
+      department: drSrinivas.department,
+      patientName: 'Pooja Sharma',
+      patientPhone: '9819876543',
+      patientEmail: 'pooja.sharma@example.com',
+      date: today,
+      timeSlot: '10:30 AM',
+      type: 'CONSULTATION',
+      status: 'IN_CONSULTATION',
+      symptoms: 'Routine 18-month pediatric immunization assessment and fever post vaccination',
+      treatmentCode: 'APOLLO-PEDIATRIC-WELLNESS',
+      fee: 700,
+      paymentStatus: 'PAY_AT_CLINIC',
+      source: 'VOICE_AI',
+      notes: 'In Chamber 2 with Dr. Srinivas. Child weight 11.2 kg.'
+    },
+    {
+      reference: 'OPD-3211',
+      clinicId: apolloClinic.id,
+      doctorId: drAnanya.id,
+      doctorName: drAnanya.name,
+      department: drAnanya.department,
+      patientName: 'Rajesh Rao',
+      patientPhone: '9741234567',
+      patientEmail: 'rajesh.rao@example.com',
+      date: today,
+      timeSlot: '10:00 AM',
+      type: 'FOLLOW_UP',
+      status: 'COMPLETED',
+      symptoms: 'Hypertension follow-up; BP recorded 122/80 mmHg',
+      treatmentCode: 'APOLLO-DIABETES-CARE',
+      fee: 750,
+      paymentStatus: 'PAID',
+      source: 'PHONE',
+      notes: 'Blood pressure well controlled. Continued on Tab. Telmisartan 40mg OD.',
+      prescription: 'Tab. Telmisartan 40mg OD in morning x 30 days.'
+    }
+  ];
+
+  for (const appt of apolloAppointments) {
+    await prisma.appointment.upsert({
+      where: { reference: appt.reference },
+      update: appt,
+      create: appt
+    });
+  }
+
   console.log('✅ Seed completed successfully:');
   console.log(`   - 2 Clinics (clove-dental, apollo-clinic)`);
-  console.log(`   - 4 Doctors`);
-  console.log(`   - 4 Dental Treatments`);
-  console.log(`   - 5 Realistic OPD Appointments`);
+  console.log(`   - 5 Doctors`);
+  console.log(`   - 7 Clinical Treatments`);
+  console.log(`   - 9 Realistic OPD Appointments`);
 }
 
 main()

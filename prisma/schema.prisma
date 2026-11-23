@@ -1,0 +1,129 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Clinic {
+  id              String        @id @default(uuid())
+  slug            String        @unique // e.g. "clove-dental", "apollo-clinic"
+  name            String
+  brand           String?
+  specialty       String        @default("Dental & Oral Surgery")
+  tagline         String?
+  description     String?
+  
+  phone           String?
+  email           String?
+  address         String?
+  city            String?
+  currency        String        @default("INR")
+  timezone        String        @default("Asia/Kolkata")
+  
+  openHours       String        @default("Monday - Saturday: 9:00 AM - 8:00 PM, Sunday: 10:00 AM - 2:00 PM")
+  checkInNotes    String        @default("Please arrive 10 minutes prior to consultation time.")
+  
+  doctors         Doctor[]
+  treatments      Treatment[]
+  appointments    Appointment[]
+  
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([slug])
+}
+
+model Doctor {
+  id              String        @id @default(uuid())
+  clinicId        String
+  clinic          Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  name            String        // e.g. "Dr. Priya Sharma"
+  designation     String        // e.g. "Senior Endodontist & Root Canal Specialist"
+  department      String        // e.g. "Endodontics", "Implantology", "General Dental"
+  qualification   String        // e.g. "MDS, BDS (AIIMS) - 12 Yrs Exp"
+  consultationFee Float         @default(500)
+  roomNumber      String        @default("OPD-1")
+  
+  availableDays   String        @default("Monday,Tuesday,Wednesday,Thursday,Friday,Saturday")
+  availableHours  String        @default("10:00 AM - 1:00 PM, 4:00 PM - 8:00 PM")
+  photoUrl        String?
+  
+  appointments    Appointment[]
+  
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([clinicId])
+}
+
+model Treatment {
+  id              String        @id @default(uuid())
+  clinicId        String
+  clinic          Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  code            String        // e.g. "CLOVE-IMPLANT", "CLOVE-RCT", "CLOVE-ALIGNER"
+  title           String        // e.g. "German Titanium Dental Implant"
+  category        String        // e.g. "Dental Surgery", "Cosmetic", "Endodontics"
+  description     String?
+  price           Float
+  currency        String        @default("INR")
+  durationMinutes Int           @default(45)
+  brochureUrl     String?       // PDF brochure link
+  prepNotes       String?       // Instructions before procedure
+  
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([clinicId, code])
+  @@index([clinicId])
+}
+
+model Appointment {
+  id              String        @id @default(uuid())
+  clinicId        String
+  clinic          Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  doctorId        String?
+  doctor          Doctor?       @relation(fields: [doctorId], references: [id], onDelete: SetNull)
+  
+  reference       String        @unique // e.g. "OPD-7821", "OPD-4012"
+  patientName     String
+  patientPhone    String
+  patientEmail    String?
+  
+  date            String        // YYYY-MM-DD
+  timeSlot        String        // e.g. "11:30 AM"
+  doctorName      String?
+  department      String?
+  
+  type            String        @default("CONSULTATION") // "CONSULTATION", "PROCEDURE", "FOLLOW_UP"
+  status          String        @default("SCHEDULED")    // "SCHEDULED", "WAITING", "IN_CONSULTATION", "COMPLETED", "CANCELLED", "NO_SHOW"
+  
+  symptoms        String?       // e.g. "Severe tooth pain on left lower jaw"
+  treatmentCode   String?
+  fee             Float         @default(500)
+  paymentStatus   String        @default("PAY_AT_CLINIC") // "PAID", "PAY_AT_CLINIC"
+  
+  notes           String?
+  prescription    String?
+  
+  source          String        @default("VOICE_AI")     // "VOICE_AI", "WALK_IN", "WEBSITE", "PHONE"
+  callRunId       String?
+  recordingUrl    String?
+  callSummary     String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([clinicId, date])
+  @@index([patientPhone])
+  @@index([status])
+  @@index([reference])
+}

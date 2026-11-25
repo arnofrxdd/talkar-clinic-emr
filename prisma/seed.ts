@@ -5,16 +5,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding Talkar Clinic EMR multi-tenant database...');
 
-  // 0. Purge any non-Clove Dental clinics to keep exclusively Clove Dental Indiranagar
-  const purgeResult = await prisma.clinic.deleteMany({
-    where: {
-      slug: { not: 'clove-dental' }
-    }
-  });
-  if (purgeResult.count > 0) {
-    console.log(`🧹 Cleaned up ${purgeResult.count} non-Clove clinics from database.`);
-  }
-
   // 1. Clinic: Clove Dental - Indiranagar
   const cloveClinic = await prisma.clinic.upsert({
     where: { slug: 'clove-dental' },

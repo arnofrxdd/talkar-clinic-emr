@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { clinicService } from '../services/clinic.js';
+import { prisma } from '../lib/prisma.js';
 
 export const clinicsRouter = Router();
 
@@ -80,6 +81,33 @@ clinicsRouter.post('/:slug/call-patient', async (req: Request, res: Response) =>
     }
     const result = await clinicService.triggerAiCall(slug, phone, patient_name);
     res.json({ success: true, message: `Call initiated to ${phone}`, result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/clinics/cleanup/keep-clove-only - Admin cleanup endpoint to purge all non-Clove clinics
+clinicsRouter.post('/cleanup/keep-clove-only', async (_req: Request, res: Response) => {
+  try {
+    const deleted = await prisma.clinic.deleteMany({
+      where: {
+        slug: { not: 'clove-dental' }
+      }
+    });
+    res.json({ success: true, message: 'Cleaned up clinics. Kept only Clove Dental.', deletedCount: deleted.count });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /api/clinics/:slug - Delete clinic and cascade associations
+clinicsRouter.delete('/:slug', async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const deleted = await prisma.clinic.delete({
+      where: { slug }
+    });
+    res.json({ success: true, message: `Clinic ${slug} deleted successfully`, deleted });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
